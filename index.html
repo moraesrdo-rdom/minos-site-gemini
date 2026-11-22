@@ -2,94 +2,46 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MINOS — Gestão Enxuta</title>
-<style>
-  :root { --bg:#0c0d0f; --card:#15171b; --text:#f2f3f5; --muted:#9ca3af; --border:#262930; --accent:#22c55e; }
-  * { box-sizing:border-box; font-family:system-ui,-apple-system,sans-serif; }
-  body { margin:0; background:var(--bg); color:var(--text); padding:20px; }
-  .wrap { max-width:960px; margin:0 auto; }
-  h1 { margin:0 0 6px; letter-spacing:.08em; }
-  p.sub { color:var(--muted); margin:0 0 24px; }
-  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:24px; }
-  .kpi { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; }
-  .kpi small { color:var(--muted); display:block; margin-bottom:6px; }
-  .kpi strong { font-size:1.4rem; }
-  .panel { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px; margin-bottom:20px; }
-  form { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; }
-  input, select, button { padding:10px; border-radius:8px; border:1px solid var(--border); background:#0c0d0f; color:var(--text); }
-  button { background:var(--text); color:var(--bg); font-weight:600; cursor:pointer; }
-  table { width:100%; border-collapse:collapse; margin-top:14px; font-size:.9rem; }
-  th, td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--border); }
-  th { color:var(--muted); font-weight:500; }
-</style>
+<meta name="description" content="Minos: camisetas fit inspiradas no Minotauro. Entre no labirinto.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Minos — Entre no labirinto</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Work+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 <div class="wrap">
-  <h1>MINOS · GESTÃO</h1>
-  <p class="sub">Controle rápido de lotes, custos e vendas (salvo localmente no navegador).</p>
-  <div class="kpis">
-    <div class="kpi"><small>Faturamento</small><strong id="k-fat">R$ 0,00</strong></div>
-    <div class="kpi"><small>Custo Total</small><strong id="k-cus">R$ 0,00</strong></div>
-    <div class="kpi"><small>Lucro Líquido</small><strong id="k-luc">R$ 0,00</strong></div>
-    <div class="kpi"><small>Margem Média</small><strong id="k-mar">0%</strong></div>
-  </div>
-  <div class="panel">
-    <form id="sale-form">
-      <select id="modelo">
-        <option>Touro Militar</option>
-        <option>Touro Marinho</option>
-        <option>Touro Branco</option>
-        <option>Touro Grafite</option>
-      </select>
-      <select id="tam"><option>P</option><option selected>M</option><option>G</option><option>GG</option></select>
-      <input type="number" id="qtd" placeholder="Qtd" value="1" min="1" required>
-      <input type="number" id="custo" placeholder="Custo unit. (R$)" value="31" step="0.01" required>
-      <input type="number" id="venda" placeholder="Venda unit. (R$)" value="89.90" step="0.01" required>
-      <button type="submit">Registrar Venda</button>
-    </form>
-    <table>
-      <thead><tr><th>Modelo</th><th>Tam</th><th>Qtd</th><th>Custo</th><th>Venda</th><th>Lucro</th></tr></thead>
-      <tbody id="rows"></tbody>
-    </table>
-  </div>
+<nav><span class="logo">MINOS</span><a href="#colecao">Coleção</a></nav>
+<header class="hero">
+<div>
+<h1>Entre no<br>labirinto.</h1>
+<p>Camisetas fit para quem treina como o Minotauro. Caimento justo, tecido respirável e o touro geométrico no peito.</p>
+<a class="btn" href="#colecao">Ver camisetas</a> <a class="btn ghost" href="#lista">Entrar na lista de espera</a>
 </div>
-<script>
-  const KEY = "minos_vendas_v1";
-  let vendas = JSON.parse(localStorage.getItem(KEY) || "[]");
-  const fmt = v => v.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
-
-  function render() {
-    let fat = 0, cus = 0;
-    const tbody = document.getElementById("rows");
-    tbody.innerHTML = "";
-    vendas.forEach(v => {
-      const tC = v.qtd * v.custo;
-      const tV = v.qtd * v.venda;
-      fat += tV; cus += tC;
-      tbody.innerHTML += `<tr><td>${v.modelo}</td><td>${v.tam}</td><td>${v.qtd}</td><td>${fmt(tC)}</td><td>${fmt(tV)}</td><td>${fmt(tV - tC)}</td></tr>`;
-    });
-    const luc = fat - cus;
-    const mar = fat > 0 ? ((luc / fat) * 100).toFixed(1) : 0;
-    document.getElementById("k-fat").textContent = fmt(fat);
-    document.getElementById("k-cus").textContent = fmt(cus);
-    document.getElementById("k-luc").textContent = fmt(luc);
-    document.getElementById("k-mar").textContent = mar + "%";
-  }
-
-  document.getElementById("sale-form").addEventListener("submit", e => {
-    e.preventDefault();
-    vendas.push({
-      modelo: document.getElementById("modelo").value,
-      tam: document.getElementById("tam").value,
-      qtd: Number(document.getElementById("qtd").value),
-      custo: Number(document.getElementById("custo").value),
-      venda: Number(document.getElementById("venda").value)
-    });
-    localStorage.setItem(KEY, JSON.stringify(vendas));
-    render();
-  });
-  render();
-</script>
+<video src="assets/video/minos-comercial.mp4" poster="assets/video/poster.jpg" controls playsinline muted loop preload="metadata" aria-label="Vídeo da marca Minos na academia"></video>
+</header>
+<section class="story">
+<h2>O touro que ninguém tirou do centro.</h2>
+<div>
+<p>Na mitologia grega, o Minotauro vivia no centro do labirinto de Minos. Ninguém passava por ele sem encarar o desafio.</p>
+<p>A Minos nasce dessa ideia: treinar é entrar no labirinto toda semana e sair mais forte. Cada peça leva o touro geométrico no peito e o nome nas costas.</p>
+</div>
+</section>
+<section class="shop" id="colecao">
+<h2>Coleção</h2>
+<div class="grid">
+<article class="card"><img src="assets/images/touro-marinho.jpg" alt="Camiseta Minos Touro Marinho" loading="lazy"><div class="info"><h3>Touro Marinho</h3><small>Azul-marinho · estampa branca</small><div class="row"><div class="sz" data-p="Touro Marinho"></div></div><a class="btn order" href="#" data-p="Touro Marinho">Pedir pelo WhatsApp</a></div></article>
+<article class="card"><img src="assets/images/touro-branco.jpg" alt="Camiseta Minos Touro Branco" loading="lazy"><div class="info"><h3>Touro Branco</h3><small>Branca · touro pequeno no peito</small><div class="row"><div class="sz" data-p="Touro Branco"></div></div><a class="btn order" href="#" data-p="Touro Branco">Pedir pelo WhatsApp</a></div></article>
+<article class="card"><img src="assets/images/touro-militar.jpg" alt="Camiseta Minos Touro Militar" loading="lazy"><div class="info"><h3>Touro Militar</h3><small>Verde-militar · estampa preta</small><div class="row"><div class="sz" data-p="Touro Militar"></div></div><a class="btn order" href="#" data-p="Touro Militar">Pedir pelo WhatsApp</a></div></article>
+<article class="card"><img src="assets/images/touro-grafite.jpg" alt="Camiseta Minos Touro Grafite" loading="lazy"><div class="info"><h3>Touro Grafite</h3><small>Grafite · tom sobre tom</small><div class="row"><div class="sz" data-p="Touro Grafite"></div></div><a class="btn order" href="#" data-p="Touro Grafite">Pedir pelo WhatsApp</a></div></article>
+</div>
+<div class="back">
+<figure><img src="assets/images/costas-preta.jpg" alt="Costas da camiseta preta com MINOS em branco" loading="lazy"><figcaption>Nas costas, o nome Minos em branco sobre preto.</figcaption></figure>
+<figure><img src="assets/images/costas-branca.jpg" alt="Costas da camiseta branca com MINOS em preto" loading="lazy"><figcaption>Versão branca com o nome em preto.</figcaption></figure>
+</div>
+</section>
+<section class="wait" id="lista"><h2>Entre na primeira turma.</h2><p>As primeiras peças saem em lote pequeno. Entre na lista e escolha a cor que você quer.</p><a class="btn order" href="#" data-p="lista de espera">Entrar pelo WhatsApp</a></section>
+<footer><span>Minos · camisetas fit</span><span>Instagram: @suamarca</span></footer>
+</div>
+<script src="js/main.js" defer></script>
 </body>
 </html>
