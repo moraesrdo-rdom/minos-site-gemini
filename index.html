@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MINOS — Gestão Enxuta</title>
+<style>
+  :root { --bg:#0c0d0f; --card:#15171b; --text:#f2f3f5; --muted:#9ca3af; --border:#262930; --accent:#22c55e; }
+  * { box-sizing:border-box; font-family:system-ui,-apple-system,sans-serif; }
+  body { margin:0; background:var(--bg); color:var(--text); padding:20px; }
+  .wrap { max-width:960px; margin:0 auto; }
+  h1 { margin:0 0 6px; letter-spacing:.08em; }
+  p.sub { color:var(--muted); margin:0 0 24px; }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:24px; }
+  .kpi { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; }
+  .kpi small { color:var(--muted); display:block; margin-bottom:6px; }
+  .kpi strong { font-size:1.4rem; }
+  .panel { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px; margin-bottom:20px; }
+  form { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; }
+  input, select, button { padding:10px; border-radius:8px; border:1px solid var(--border); background:#0c0d0f; color:var(--text); }
+  button { background:var(--text); color:var(--bg); font-weight:600; cursor:pointer; }
+  table { width:100%; border-collapse:collapse; margin-top:14px; font-size:.9rem; }
+  th, td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--border); }
+  th { color:var(--muted); font-weight:500; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>MINOS · GESTÃO</h1>
+  <p class="sub">Controle rápido de lotes, custos e vendas (salvo localmente no navegador).</p>
+  <div class="kpis">
+    <div class="kpi"><small>Faturamento</small><strong id="k-fat">R$ 0,00</strong></div>
+    <div class="kpi"><small>Custo Total</small><strong id="k-cus">R$ 0,00</strong></div>
+    <div class="kpi"><small>Lucro Líquido</small><strong id="k-luc">R$ 0,00</strong></div>
+    <div class="kpi"><small>Margem Média</small><strong id="k-mar">0%</strong></div>
+  </div>
+  <div class="panel">
+    <form id="sale-form">
+      <select id="modelo">
+        <option>Touro Militar</option>
+        <option>Touro Marinho</option>
+        <option>Touro Branco</option>
+        <option>Touro Grafite</option>
+      </select>
+      <select id="tam"><option>P</option><option selected>M</option><option>G</option><option>GG</option></select>
+      <input type="number" id="qtd" placeholder="Qtd" value="1" min="1" required>
+      <input type="number" id="custo" placeholder="Custo unit. (R$)" value="31" step="0.01" required>
+      <input type="number" id="venda" placeholder="Venda unit. (R$)" value="89.90" step="0.01" required>
+      <button type="submit">Registrar Venda</button>
+    </form>
+    <table>
+      <thead><tr><th>Modelo</th><th>Tam</th><th>Qtd</th><th>Custo</th><th>Venda</th><th>Lucro</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</div>
+<script>
+  const KEY = "minos_vendas_v1";
+  let vendas = JSON.parse(localStorage.getItem(KEY) || "[]");
+  const fmt = v => v.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
+
+  function render() {
+    let fat = 0, cus = 0;
+    const tbody = document.getElementById("rows");
+    tbody.innerHTML = "";
+    vendas.forEach(v => {
+      const tC = v.qtd * v.custo;
+      const tV = v.qtd * v.venda;
+      fat += tV; cus += tC;
+      tbody.innerHTML += `<tr><td>${v.modelo}</td><td>${v.tam}</td><td>${v.qtd}</td><td>${fmt(tC)}</td><td>${fmt(tV)}</td><td>${fmt(tV - tC)}</td></tr>`;
+    });
+    const luc = fat - cus;
+    const mar = fat > 0 ? ((luc / fat) * 100).toFixed(1) : 0;
+    document.getElementById("k-fat").textContent = fmt(fat);
+    document.getElementById("k-cus").textContent = fmt(cus);
+    document.getElementById("k-luc").textContent = fmt(luc);
+    document.getElementById("k-mar").textContent = mar + "%";
+  }
+
+  document.getElementById("sale-form").addEventListener("submit", e => {
+    e.preventDefault();
+    vendas.push({
+      modelo: document.getElementById("modelo").value,
+      tam: document.getElementById("tam").value,
+      qtd: Number(document.getElementById("qtd").value),
+      custo: Number(document.getElementById("custo").value),
+      venda: Number(document.getElementById("venda").value)
+    });
+    localStorage.setItem(KEY, JSON.stringify(vendas));
+    render();
+  });
+  render();
+</script>
+</body>
+</html>
